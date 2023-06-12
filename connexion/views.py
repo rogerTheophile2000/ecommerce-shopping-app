@@ -1,7 +1,8 @@
-from django.shortcuts import render, redirect, HttpResponse
+from django.shortcuts import render, redirect
+from django.utils.datastructures import MultiValueDictKeyError
 from django.contrib.auth.models import User
 from django.contrib import messages
-
+from django.contrib.auth import authenticate, login, logout
 
 
 # Create your views here.
@@ -29,6 +30,20 @@ def signup(request):
 
 
 def handlelogin(request):
+    if request.method=="POST":
+        try :
+            username = request.POST['email']
+            password = request.POST['password1']
+            myuser= authenticate(username = username, password = password)
+        except MultiValueDictKeyError:
+            password = False
+        if myuser is not None:
+            login(request, myuser)
+            messages.success(request, "Login Success")
+            return render(request, "index.html")
+        else:
+            messages.error(request, "Invalid Credentials")
+            return redirect('/connexion/login')
     return render(request, "connexion/login.html", {})
 
 def handlelogout(request):
